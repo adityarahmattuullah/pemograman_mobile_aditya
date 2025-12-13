@@ -1,101 +1,81 @@
-// lib/widgets/todo_item.dart
 import 'package:flutter/material.dart';
 import '../models/todo.dart';
 
-// Definisi warna primer agar konsisten
-const Color primaryColor = Color(0xFF6C63FF); 
-
 class TodoItem extends StatelessWidget {
   final Todo todo;
-  final Function(Todo) onToggle;
-  final Function(String) onEdit;
-  final Function(String) onDelete;
+  final VoidCallback onToggle;
+  final VoidCallback onDelete;
+  final VoidCallback onEdit;
 
   const TodoItem({
     super.key,
     required this.todo,
     required this.onToggle,
-    required this.onEdit,
     required this.onDelete,
+    required this.onEdit,
   });
 
   @override
   Widget build(BuildContext context) {
-    final bool isDark = Theme.of(context).brightness == Brightness.dark;
-    
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: isDark ? Colors.grey[900] : Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(20),
+        gradient: todo.isDone
+            ? LinearGradient(
+                colors: [Colors.grey.shade200, Colors.grey.shade100],
+              )
+            : const LinearGradient(
+                colors: [Color(0xFFEEF2FF), Color(0xFFE0E7FF)],
+              ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            spreadRadius: 0,
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          )
         ],
-        // Border berwarna jika tugas belum selesai
-        border: todo.isCompleted
-            ? null
-            : Border(left: BorderSide(color: primaryColor, width: 5)),
       ),
       child: ListTile(
-        leading: Checkbox(
-          value: todo.isCompleted,
-          onChanged: (_) => onToggle(todo),
-          activeColor: primaryColor,
-          checkColor: Colors.white,
+        leading: GestureDetector(
+          onTap: onToggle,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: todo.isDone ? Colors.indigo : Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.indigo),
+            ),
+            child: todo.isDone
+                ? const Icon(Icons.check, color: Colors.white, size: 18)
+                : null,
+          ),
         ),
         title: Text(
           todo.title,
           style: TextStyle(
-            decoration: todo.isCompleted ? TextDecoration.lineThrough : null,
-            color: todo.isCompleted ? Colors.grey : (isDark ? Colors.white : Colors.black87),
-            fontWeight: todo.isCompleted ? FontWeight.normal : FontWeight.w600,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            decoration: todo.isDone ? TextDecoration.lineThrough : null,
+            color: todo.isDone ? Colors.grey : Colors.black,
           ),
         ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
-              icon: Icon(Icons.edit_note, color: Colors.blue.shade400),
-              onPressed: () => _showEditDialog(context),
+              icon: const Icon(Icons.edit, color: Colors.orange),
+              onPressed: onEdit,
             ),
             IconButton(
-              icon: Icon(Icons.delete_outline, color: Colors.red.shade400),
-              onPressed: () => onDelete(todo.id),
+              icon: const Icon(Icons.delete, color: Colors.red),
+              onPressed: onDelete,
             ),
           ],
         ),
-        onTap: () => onToggle(todo),
-      ),
-    );
-  }
-
-  void _showEditDialog(BuildContext context) {
-    TextEditingController controller = TextEditingController(text: todo.title);
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Edit Tugas'),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: const InputDecoration(hintText: 'Masukkan tugas baru'),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Batal')),
-          ElevatedButton(
-            onPressed: () {
-              if (controller.text.trim().isNotEmpty) {
-                 onEdit(controller.text.trim());
-              }
-              Navigator.pop(ctx);
-            },
-            child: const Text('Simpan'),
-          ),
-        ],
       ),
     );
   }

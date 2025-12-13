@@ -1,39 +1,20 @@
-// lib/models/todo.dart
-import 'package:uuid/uuid.dart';
-
 class Todo {
-  final String id;
   String title;
-  bool isCompleted;
+  bool isDone;
 
-  Todo({
-    required this.id,
-    required this.title,
-    this.isCompleted = false,
-  });
+  Todo({required this.title, this.isDone = false});
 
-  factory Todo.create(String title) {
-    final uuid = Uuid(); 
-    return Todo(
-      id: uuid.v4(),
-      title: title,
-      isCompleted: false,
-    );
-  }
-
-  factory Todo.fromJson(Map<String, dynamic> json) {
-    return Todo(
-      id: json['id'] as String,
-      title: json['title'] as String,
-      isCompleted: json['isCompleted'] as bool,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     return {
-      'id': id,
       'title': title,
-      'isCompleted': isCompleted,
+      'isDone': isDone,
     };
+  }
+
+  factory Todo.fromMap(Map<String, dynamic> map) {
+    return Todo(
+      title: map['title'],
+      isDone: map['isDone'],
+    );
   }
 }
